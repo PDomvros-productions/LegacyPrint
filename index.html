@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LegacyPrint</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+
+        :root {
+            --primary-bg: #020c1b;     /* Darkened from #0a192f */
+            --secondary-bg: #0a192f;   /* Darkened from #172a45 */
+            --accent-colour: #ffd700;
+            --accent-colour-light: #fff8e1;
+            --text-primary: #e6f1ff;
+            --text-secondary: #8892b0;
+        }
+
+        /* --- CSS Reset for Mobile Consistency --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        /* --- End Reset --- */
+
+        html { height: 100%; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            height: 100%; width: 100%;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%; height: 100%;
+            background-color: var(--secondary-bg);
+            overflow: hidden; position: relative;
+            display: flex; flex-direction: column;
+        }
+
+        .logo-img {
+            width: 60px; height: 60px;
+            border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--accent-colour);
+            margin-bottom: 15px; flex-shrink: 0;
+        }
+
+        .screen {
+            padding: 20px; box-sizing: border-box;
+            display: none; flex-direction: column;
+            align-items: center; justify-content: center;
+            flex-grow: 1;
+            text-align: center;
+            animation: fadeIn 0.5s ease-in-out;
+            width: 100%;
+            height: 100%;
+        }
+        
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .screen.active { display: flex; }
+        
+        h1 { font-weight: 900; font-size: clamp(2.2em, 9vw, 3em); color: var(--accent-colour); margin-bottom: 10px; }
+        h2 { font-weight: 700; font-size: clamp(1.3em, 6vw, 1.8em); margin-bottom: 15px; }
+        h3 { font-weight: 700; color: var(--accent-colour); padding-top: 15px; margin-top: 15px; font-size: clamp(1.1em, 5vw, 1.3em); }
+        p { color: var(--text-secondary); font-size: clamp(0.9em, 4vw, 1.1em); line-height: 1.6; max-width: 90%; margin-top: 10px; }
+        
+        .privacy-notice {
+            font-size: 0.8em;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-top: 20px;
+        }
+
+        .button {
+            background: linear-gradient(90deg, #daa520, var(--accent-colour));
+            color: #020c1b; font-size: clamp(1em, 4.5vw, 1.2em); font-weight: 700;
+            padding: 15px 30px; border-radius: 50px; border: none;
+            cursor: pointer; margin-top: 20px; flex-shrink: 0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            width: 80%; max-width: 300px;
+        }
+        .button:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255, 215, 0, 0.4); }
+
+        .nav-button {
+             background: transparent;
+             border: 2px solid var(--accent-colour);
+             color: var(--accent-colour);
+             padding: 10px 25px;
+             width: 120px;
+             margin-top: 10px;
+        }
+        .nav-button:hover {
+            background-color: rgba(255, 215, 0, 0.1);
+            box-shadow: none;
+        }
+
+        .footer {
+            font-size: 0.8em; color: #8892b0; margin-top: auto; padding: 20px 0 10px 0; flex-shrink: 0;
+        }
+        
+        #scanner-img-btn {
+            width: 150px; height: 150px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s ease;
+            border-radius: 15px; /* Added for non-square images */
+            object-fit: cover; /* Ensures image fits well */
+        }
+        #scanner-img-btn:hover {
+             transform: scale(1.05);
+        }
+
+        .loader-text {
+            color: var(--accent-colour-light);
+            font-style: italic;
+            height: 30px;
+        }
+        
+        #results-screen {
+            justify-content: space-between;
+        }
+
+        .results-page {
+             display: none; width: 100%;
+             flex-direction: column; align-items: center;
+             justify-content: center;
+             flex-grow: 1;
+             -webkit-overflow-scrolling: touch;
+        }
+        .results-page.active { display: flex; }
+
+        .result-print-img {
+            width: 80px; height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.6;
+            border-radius: 8px; /* Added for non-square images */
+            object-fit: cover; /* Ensures image fits well */
+        }
+
+        .nav-container {
+             display: flex;
+             flex-direction: column;
+             align-items: center;
+             width: 100%;
+             padding-top: 20px;
+             flex-shrink: 0;
+        }
+        
+        #comparison-name { font-size: clamp(1.8em, 8vw, 2.5em); margin: 5px 0 15px 0; }
+        #comparison-bio { font-style: italic; border-top: 1px solid #0a192f; padding-top: 15px;}
+        #result-examples { font-size: 0.9em; }
+
+    </style>
+</head>
+<body>
+    <div class="app-container">
+
+        <div id="welcome-screen" class="screen active">
+            <img src="panos.jpg" alt="Logo" class="logo-img">
+            <h1>LegacyPrint</h1>
+            <p>Your fingerprint is a unique story. Let's scan its patterns to reveal your core archetype and your historical counterpart.</p>
+            <p class="privacy-notice">No personal data is stored by this app.</p>
+            <button id="begin-btn" class="button">Begin Analysis</button>
+            <div class="footer">Devised by Panagiotis Domvros, English and Drama Teacher, All Rights Reserved</div>
+        </div>
+
+        <div id="gender-screen" class="screen">
+            <img src="panos.jpg" alt="Logo" class="logo-img">
+            <h2>Select an Option</h2>
+            <p>Your analysis will be compared against historical figures. Please choose a category.</p>
+            <button id="male-btn" class="button">Male Figures</button>
+            <button id="female-btn" class="button">Female Figures</button>
+        </div>
+
+        <div id="analysis-screen" class="screen">
+            <div id="analysis-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                <img src="panos.jpg" alt="Logo" class="logo-img">
+                <p>To calibrate the analyser, please place your finger on the scanner below.</p>
+                <img id="scanner-img-btn" src="fingerprint.jpg" alt="Fingerprint Scanner">
+            </div>
+            <div id="analysis-loader" style="display: none; flex-direction: column; align-items: center; justify-content: center;">
+                 <img src="panos.jpg" alt="Logo" class="logo-img">
+                 <p id="loader-text" class="loader-text"></p>
+            </div>
+        </div>
+        
+        <div id="reveal-screen" class="screen">
+            <img src="panos.jpg" alt="Logo" class="logo-img">
+            <p>Your legacy print reveals the archetype of...</p>
+            <h1 id="reveal-name"></h1>
+        </div>
+
+        <div id="results-screen" class="screen">
+            <div id="results-page-1" class="results-page">
+                <img class="result-print-img" src="fingerprint.jpg" alt="Your Analysed Print">
+                <h2 id="result-title"></h2>
+                <p id="core-statement"></p>
+            </div>
+            <div id="results-page-2" class="results-page">
+                <img src="panos.jpg" alt="Logo" class="logo-img">
+                <h3>Your Historical Counterpart</h3>
+                <h1 id="comparison-name"></h1>
+                <p id="comparison-bio"></p>
+            </div>
+             <div id="results-page-3" class="results-page">
+                <img src="panos.jpg" alt="Logo" class="logo-img">
+                <h3>Other Examples</h3>
+                <p id="result-examples"></p>
+                <button id="restart-btn" class="button">Analyse Again</button>
+            </div>
+
+            <div class="nav-container">
+                <button id="back-btn" class="button nav-button" style="visibility: hidden;">Back</button>
+                <button id="next-btn" class="button nav-button">Next</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // --- DATA ---
+            const profiles = {
+                male: [
+                    { name: "Strategist", statement: "Your print reveals a mind of logic and foresight. You see the world as a series of moves on a chessboard, always thinking three steps ahead.", comparison: "Pericles of Athens", bio: "Pericles was a prominent and influential Greek statesman, orator, and general of Athens during its Golden Age. He led Athens from 461 to 429 BC, overseeing a period of great artistic and cultural achievement. His ambitious project to build the Acropolis, including the Parthenon, left a lasting legacy on Western civilisation. He championed democracy and turned the Athenian empire into the political and cultural centre of ancient Greece.", examples: "Other examples include Odysseus, Napoleon Bonaparte, and Winston Churchill." },
+                    { name: "Philosopher", statement: "Your unique whorls indicate a deep curiosity and a quest for knowledge. You are driven not by answers, but by the pursuit of better questions.", comparison: "Aristotle", bio: "A Greek philosopher and polymath, Aristotle's writings cover a vast range of subjects including physics, biology, ethics, politics, and metaphysics. A student of Plato, he later became the tutor of Alexander the Great. His works created a comprehensive system of Western philosophy, and for centuries, his ideas were the foundation of scientific and philosophical thought. His intellectual influence is among the most profound in human history.", examples: "Other examples include Plato, Socrates, and Leonardo da Vinci." },
+                    { name: "King", statement: "The arches in your print suggest a foundation of leadership and responsibility. You carry the weight of your decisions with authority and a vision for the future.", comparison: "Alexander the Great", bio: "As king of the ancient Greek kingdom of Macedon, Alexander created one of the largest empires of the ancient world by the age of thirty, stretching from Greece to northwestern India. Undefeated in battle, he is widely considered one of history's most successful military commanders. His campaigns led to the spread of Greek culture, resulting in a new Hellenistic civilisation.", examples: "Other examples include King Leonidas of Sparta, Marcus Aurelius, and Nelson Mandela." },
+                    { name: "Poet", statement: "The flowing ridges of your print mirror a soul rich with emotion and imagination. You have a gift for capturing the human experience in words.", comparison: "Constantine Cavafy", bio: "Constantine P. Cavafy was a Greek poet, journalist, and civil servant from Alexandria, Egypt. He is now considered one of the most important figures of modern Greek poetry. His work often features themes of history, hedonism, and fate. He was known for his precise and intimate style, and his poems, like 'Ithaca' and 'Waiting for the Barbarians,' have been influential worldwide.", examples: "Other examples include Homer, William Shakespeare, and Pablo Neruda." },
+                    { name: "Titan", statement: "Your print shows immense strength and determination. You are a force of nature, capable of achieving incredible feats through sheer willpower and physical prowess.", comparison: "Giannis Antetokounmpo", bio: "A Greek-Nigerian professional basketball player, Giannis Antetokounmpo is one of the most decorated players in NBA history. Known as the 'Greek Freak' for his incredible size, speed, and skill, he led the Milwaukee Bucks to an NBA championship in 2021. His journey from a stateless youth in Athens to a global superstar is a story of immense perseverance and dedication, making him an inspiration worldwide.", examples: "Other examples include Hercules, Muhammad Ali, and Michael Jordan." },
+                    { name: "Innovator", statement: "The complex patterns in your print point to a mind that thinks differently. You connect ideas in new ways, driving progress through invention and ingenuity.", comparison: "Archimedes", bio: "Archimedes of Syracuse was a Greek mathematician, physicist, engineer, and inventor. He is regarded as one of the leading scientists in classical antiquity. Among his advances in physics are the foundations of hydrostatics, statics, and an explanation of the principle of the lever. He is credited with designing innovative machines, such as his screw pump and compound pulleys. The 'Eureka' moment is famously attributed to him.", examples: "Other examples include Steve Jobs, Nikola Tesla, and Elon Musk." },
+                    { name: "Healer", statement: "Your fingerprint shows a pattern of empathy and service. You are driven by a deep-seated need to mend, whether it's the body, the mind, or the community.", comparison: "Hippocrates", bio: "Hippocrates of Kos was a Greek physician of the Age of Pericles who is considered one of the most outstanding figures in the history of medicine. He is traditionally referred to as the 'Father of Medicine' in recognition of his lasting contributions to the field. He founded a school of medicine that revolutionised the practice, establishing it as a discipline distinct from other fields like philosophy and a profession in its own right.", examples: "Other examples include Asclepius, Albert Schweitzer, and Dr. Anthony Fauci." },
+                    { name: "Composer", statement: "The harmonious flow of your print's ridges reveals a soul that hears music in the silence. You create soundscapes that move and inspire generations.", comparison: "Mozart", bio: "Wolfgang Amadeus Mozart was a prolific and influential composer of the Classical period. Born in Salzburg, he showed prodigious ability from his earliest childhood. He composed more than 800 works, including symphonies, operas, and concertos. His music is revered for its melodic beauty, formal elegance, and richness of harmony and texture. He is widely recognised as one of the greatest composers in the history of Western music.", examples: "Other examples include Mikis Theodorakis, Vangelis, and John Williams." },
+                    { name: "Rebel", statement: "The sharp, unpredictable breaks in your print's pattern signify a spirit that challenges the status quo. You fight for your beliefs, even when you stand alone.", comparison: "Che Guevara", bio: "An Argentine Marxist revolutionary, physician, author, and diplomat, Che Guevara was a major figure of the Cuban Revolution. His stylized visage has become a ubiquitous countercultural symbol of rebellion and global insignia within popular culture. He remains a revered and reviled historical figure, polarized in the collective imagination by his commitment to radical social change and anti-imperialism.", examples: "Other examples include Theodoros Kolokotronis, Spartacus, and Galileo Galilei." },
+                    { name: "Merchant", statement: "Your print reveals a natural talent for negotiation and enterprise. You see opportunity where others see obstacles and can build empires from scratch.", comparison: "Aristotle Onassis", bio: "Aristotle Onassis was a Greek shipping magnate who amassed the world's largest privately owned shipping fleet and was one of the world's richest and most famous men. He was known for his business success, his great wealth, and his high-profile relationships. His life was a rags-to-riches story, demonstrating a remarkable ability to navigate the complex world of international business and finance.", examples: "Other examples include Marco Polo, John D. Rockefeller, and Jeff Bezos." },
+                    { name: "Explorer", statement: "The long, winding ridges of your print speak of wanderlust and a desire for discovery. Your path is one of adventure into the unknown.", comparison: "Marco Polo", bio: "Marco Polo was a Venetian merchant, explorer, and writer who travelled through Asia along the Silk Road between 1271 and 1295. His travels are recorded in 'The Travels of Marco Polo,' a book that described to Europeans the then-mysterious culture and inner workings of the Eastern world, including the wealth and great size of the Mongol Empire and China. His journey inspired countless other adventurers.", examples: "Other examples include Neil Armstrong, Jacques Cousteau, and Christopher Columbus." },
+                    { name: "Statesman", statement: "Your print’s balanced and clear patterns indicate a gift for diplomacy and governance. You seek order, justice, and the common good through careful leadership.", comparison: "Eleftherios Venizelos", bio: "Eleftherios Venizelos was an eminent Greek statesman who served as Prime Minister of Greece eight times. His influence on Greek and wider European politics was profound. He is credited with expanding modern Greece and is celebrated as the 'Maker of Modern Greece.' He was a skilled diplomat who navigated the nation through the Balkan Wars, World War I, and major social and economic reforms.", examples: "Other examples include Abraham Lincoln, Charlemagne, and Dag Hammarskjöld." },
+                    { name: "Artist", statement: "The unique and intricate design of your print shows a creative soul. You express your inner world through colour, shape, and form, leaving beauty in your wake.", comparison: "El Greco (Doménikos Theotokópoulos)", bio: "Doménikos Theotokópoulos, universally known as El Greco ('The Greek'), was a painter, sculptor, and architect of the Spanish Renaissance. Born in Crete, he was a master of dramatic and expressionistic painting. His work is characterized by tortuously elongated figures and often fantastic or phantasmagorical pigmentation, marrying Byzantine traditions with Western painting styles. He is considered a precursor of both Expressionism and Cubism.", examples: "Other examples include Leonardo da Vinci, Vincent van Gogh, and Pablo Picasso." },
+                    { name: "Orator", statement: "The commanding loops in your print suggest a powerful, persuasive voice. When you speak, people listen, captivated by your passion and rhetoric.", comparison: "Barack Obama", bio: "Barack Obama served as the 44th president of the United States. A member of the Democratic Party, he was the first African American president. His presidency was marked by the passage of the Affordable Care Act and efforts to address the Great Recession. He is known globally for his exceptional oratory skills, which were central to his rapid rise in politics and his ability to inspire and connect with diverse audiences.", examples: "Other examples include Martin Luther King Jr., Cicero, and Demosthenes." },
+                    { name: "Author", statement: "Your print tells a story of worlds waiting to be written. You have a deep understanding of plot and character, with a mind that constantly weaves narratives.", comparison: "Nikos Kazantzakis", bio: "Nikos Kazantzakis was a Greek writer and philosopher, celebrated for his novels, poetry, essays, and travelogues. He is the most translated modern Greek author. His most famous work, 'Zorba the Greek,' became an international sensation. His novels often touch upon profound existential questions, exploring the struggles between the flesh and the spirit, and the nature of God and humanity.", examples: "Other examples include George Orwell, J.R.R. Tolkien, and Stephen King." },
+                    { name: "Guardian", statement: "The strong, encircling whorls in your print symbolize a protective and loyal nature. You are the steadfast defender of your family, your community, and your ideals.", comparison: "Iron Man (Tony Stark)", bio: "A fictional character from Marvel Comics, Tony Stark is a genius industrialist and inventor who creates a powered suit of armor to become the superhero Iron Man. Initially a self-absorbed weapons manufacturer, he has a change of heart and dedicates his life and immense resources to protecting the world. He embodies the archetype of a guardian who uses technology and intellect as a shield for humanity.", examples: "Other examples include a Secret Service agent, Batman, and Samwise Gamgee." },
+                    { name: "Visionary", statement: "The unusual and forward-looking patterns in your print reveal a mind fixed on the future. You don't just predict what's next; you create it.", comparison: "Leonardo da Vinci", bio: "Leonardo da Vinci was an Italian polymath of the High Renaissance who is widely considered one of the most diversely talented individuals ever to have lived. While he is most famous as a painter, his notebooks contain designs for flying machines, armored vehicles, and concentrated solar power. His unquenchable curiosity and inventive imagination made him the quintessential 'Renaissance man,' a true visionary far ahead of his time.", examples: "Other examples include Jules Verne, Walt Disney, and Steve Jobs." },
+                    { name: "Performer", statement: "Your print radiates a charismatic energy. You are most alive in the spotlight, captivating audiences with your talent and magnetic presence.", comparison: "Charlie Chaplin", bio: "Sir Charlie Chaplin was an English comic actor, filmmaker, and composer who rose to fame in the era of silent film. He became a worldwide icon through his screen persona, 'The Tramp,' and is considered one of the most important figures in the history of the film industry. His career spanned more than 75 years, from childhood in the Victorian era to his death in Switzerland.", examples: "Other examples include Freddie Mercury, Demis Roussos, and Dwayne 'The Rock' Johnson." },
+                    { name: "Anchor", statement: "The simple, strong patterns of your print suggest a personality of immense stability and reliability. You are the calm centre in any storm, defined by quiet courage.", comparison: "Ernest Hemingway", bio: "Ernest Hemingway was an American novelist, short-story writer, and journalist. His economical and understated style had a strong influence on 20th-century fiction. Many of his works, such as 'The Old Man and the Sea,' celebrate stoic heroes who exhibit grace under pressure. He embodies the anchor archetype—a figure of quiet strength and resilience facing immense challenges alone.", examples: "Other examples include an old lighthouse keeper, Atticus Finch, and Captain 'Sully' Sullenberger." },
+                    { name: "Naturalist", statement: "The organic, earth-like patterns in your print reveal a deep connection to the natural world. You are its student, its protector, and its passionate advocate.", comparison: "Sir David Attenborough", bio: "Sir David Attenborough is an English broadcaster, biologist, and natural historian. He is celebrated for writing and presenting, in conjunction with the BBC Natural History Unit, the nine natural history documentary series forming the 'Life' collection that collectively form a comprehensive survey of animal and plant life on Earth. His calming voice and profound respect for nature have inspired millions to care for the planet.", examples: "Other examples include Jane Goodall, Jacques Cousteau, and a Cretan herbalist." }
+                ],
+                female: [
+                    { name: "Icon", statement: "Your fingerprint radiates charisma and influence. You have a natural star quality and an unbreakable spirit that inspires those around you.", comparison: "Melina Mercouri", bio: "Melina Mercouri was a Greek actress, singer, and politician. As an actress, she gained international acclaim, but she is perhaps best remembered for her passionate political activism. After the Greek military junta fell, she became a Member of Parliament and was the first female Minister for Culture and Sport. She was a fiery, charismatic advocate for Greek culture, famously campaigning for the return of the Parthenon Marbles.", examples: "Other examples include Cleopatra, Marilyn Monroe, and Princess Diana." },
+                    { name: "Poet", statement: "The delicate loops in your print suggest a soul attuned to beauty and emotion. You translate the world's complexities into profound and moving art.", comparison: "Maya Angelou", bio: "Maya Angelou was an American poet, memoirist, and civil rights activist. She published seven autobiographies, three books of essays, several books of poetry, and is credited with a list of plays, movies, and television shows spanning over 50 years. She received dozens of awards and more than 50 honorary degrees. Her work often explores themes of identity, racism, family, and travel, and she is celebrated for her profound wisdom and lyrical voice.", examples: "Other examples include Sappho of Lesbos, Emily Dickinson, and Virginia Woolf." },
+                    { name: "Diva", statement: "Your print shows a pattern of breathtaking talent and commanding presence. Your voice, whether literal or figurative, is a force of nature that cannot be ignored.", comparison: "Maria Callas", bio: "Maria Callas was a Greek-American opera singer and one of the most renowned and influential sopranos of the 20th century. Her musical and dramatic talents led to her being hailed as 'La Divina' ('the Divine one'). She possessed a voice of remarkable range and intensity, which she combined with a unique dramatic genius. She revitalised many forgotten operas and became a global superstar beyond the world of opera.", examples: "Other examples include Aretha Franklin, Whitney Houston, and Adele." },
+                    { name: "Oracle", statement: "Your print has the clarity of prophecy. You possess a powerful intuition and an ability to see the underlying truths that others miss, guided by an unwavering faith in your vision.", comparison: "Joan of Arc", bio: "Joan of Arc is a patron saint of France, honoured as a defender of the French nation for her role in the siege of Orléans and her insistence on the coronation of Charles VII during the Hundred Years' War. Claiming divine guidance, she led the French army to a momentous victory. She was captured, tried for heresy, and burned at the stake at the age of 19. Her faith and conviction made her a legendary historical figure.", examples: "Other examples include the Pythia of Delphi, Queen Elizabeth I, and Galadriel." },
+                    { name: "Rebel Queen", statement: "The sharp, defiant patterns in your print mark you as a warrior and a leader. You defy convention and will risk everything to fight for your people and your freedom.", comparison: "Laskarina Bouboulina", bio: "Laskarina Bouboulina was a Greek naval commander, heroine of the Greek War of Independence in 1821, and is considered the first woman to be made an admiral. She used her own fortune to build ships and supply the Greek forces. She commanded her own fleet in crucial battles, becoming a legendary figure of the revolution. Her bravery and leadership defied the conventions of her time, making her a national hero.", examples: "Other examples include Boudica, Manto Mavrogenous, and Katniss Everdeen." },
+                    { name: "Scholar", statement: "Your print's intricate and logical design reveals a brilliant mind dedicated to reason, science, and the pursuit of knowledge against all odds.", comparison: "Marie Curie", bio: "Marie Curie was a Polish and naturalised-French physicist and chemist who conducted pioneering research on radioactivity. She was the first woman to win a Nobel Prize, the first person and the only woman to win the Nobel Prize twice, and the only person to win the Nobel Prize in two different scientific fields. Her work not only changed the world of science forever but also broke down barriers for women in STEM.", examples: "Other examples include Hypatia of Alexandria, Ada Lovelace, and Rosalind Franklin." },
+                    { name: "Muse", statement: "The elegant and inspiring patterns of your print show a nature that ignites creativity in others. You are a source of intellectual and artistic inspiration.", comparison: "Aspasia of Miletus", bio: "Aspasia of Miletus was a prominent immigrant to Classical-era Athens who became the partner of the statesman Pericles. She was known for her intelligence and wit, and her home became an intellectual centre in Athens, attracting the most prominent writers and thinkers, including Socrates. Though few details of her life are certain, she was portrayed in the writings of Plato and others as a figure of great intellect and influence.", examples: "Other examples include Gala Dalí, Yoko Ono, and Lee Miller." },
+                    { name: "Matriarch", statement: "The strong, encompassing whorls in your print speak of a fierce protector with a will of steel. You are an unshakable political and familial leader.", comparison: "Gorgo, Queen of Sparta", bio: "Gorgo was the Queen of Sparta and wife of King Leonidas I. Known for her political wisdom and judgment from a young age, she was a figure of significant influence. She famously decoded a secret message that warned of Xerxes' invasion of Greece. Unlike other women in the ancient world, she was educated, outspoken, and deeply involved in state affairs, embodying the strength and intelligence of Spartan women.", examples: "Other examples include Mother Teresa, a Roman Matron, and Molly Weasley." },
+                    { name: "Actress", statement: "The transformative patterns in your print suggest a deep understanding of human emotion. You can inhabit any role, reflecting the world's stories with power and grace.", comparison: "Meryl Streep", bio: "Meryl Streep is an American actress often described as the 'best actress of her generation.' She is particularly known for her versatility and her ability to adapt to different accents. Nominated for a record 21 Academy Awards, she has won three. Her body of work is immense, and her dedication to her craft and ability to disappear into a role have made her a revered figure in the world of cinema.", examples: "Other examples include Katharine Hepburn, Cate Blanchett, and Irene Papas." },
+                    { name: "Diplomat", statement: "The balanced, symmetrical design of your print indicates a mind built for peace and understanding. You bridge divides with grace, intelligence, and modern advocacy.", comparison: "Queen Rania of Jordan", bio: "Queen Rania of Jordan is known for her advocacy work in areas of education, health, community empowerment, youth, and cross-cultural dialogue. She uses her platform to promote tolerance and compassion and has launched several initiatives to improve the lives of Jordanians and people across the region. She is a modern, globally recognised figure who embodies diplomacy, elegance, and a commitment to social progress.", examples: "Other examples include Angela Merkel, Katerina Sakellaropoulou, and Princess Leia." },
+                    { name: "Siren", statement: "The alluring curves of your print suggest a magnetic and captivating voice. Your talent can charm millions and become a sound recognised across the globe.", comparison: "Celine Dion", bio: "Celine Dion is a Canadian singer who is renowned for her powerful and technically skilled vocals. She rose to international superstardom in the 1990s and is one of the best-selling artists of all time. Her voice, associated with epic love ballads like 'My Heart Will Go On,' has a universal appeal that transcends language and borders, making her a true global siren whose music has touched millions.", examples: "Other examples include Edith Piaf, Dolly Parton, and Nana Mouskouri." },
+                    { name: "Pioneer", statement: "The outward-reaching loops in your print speak of a spirit that breaks new ground. You are unafraid to be the first, charting a course for others to follow.", comparison: "Amelia Earhart", bio: "Amelia Earhart was an American aviation pioneer. She was the first female aviator to fly solo across the Atlantic Ocean. She set many other records, wrote best-selling books about her flying experiences, and was instrumental in the formation of The Ninety-Nines, an organisation for female pilots. Her courage and ambition challenged gender roles and inspired generations of women to pursue their dreams.", examples: "Other examples include Valentina Tereshkova, Sally Ride, and Bessie Coleman." },
+                    { name: "Activist", statement: "The determined, focused ridges of your print reveal an unshakeable commitment to justice. You are a powerful voice for the voiceless and an agent of change.", comparison: "Malala Yousafzai", bio: "Malala Yousafzai is a Pakistani activist for female education and the youngest Nobel Prize laureate. She is known for human rights advocacy, especially the education of women and children in her native Swat Valley in Northwest Pakistan, where the local Taliban had at times banned girls from attending school. Her story of survival and her unwavering commitment to education have made her an international symbol of peaceful protest.", examples: "Other examples include Rosa Parks, Greta Thunberg, and Susan B. Anthony." },
+                    { name: "Empress", statement: "The regal and complex design of your print, reflecting a natural ability to rule. You command respect through strength, intelligence, and strategic vision.", comparison: "Theodora (Byzantine Empress)", bio: "Theodora was empress of the Byzantine Empire by marriage to Emperor Justinian I. She was one of the most influential and powerful of the Byzantine empresses. Starting from a humble background, she rose to become Justinian's most trusted advisor. She used her intelligence and political acumen to influence policy, particularly in protecting women's rights, and her resolve famously saved the throne during the Nika riots.", examples: "Other examples include Catherine the Great, Wu Zetian, and Daenerys Targaryen." },
+                    { name: "Storyteller", statement: "Your fingerprint is like a map of countless tales. You have a unique ability to weave narratives that captivate, educate, and shape culture.", comparison: "J.K. Rowling", bio: "J. K. Rowling is a British author, best known for writing the Harry Potter series, which has won multiple awards and sold more than 500 million copies, becoming the best-selling book series in history. From a struggling single mother, she became a global literary sensation. Her ability to create a vast, immersive world has captivated a generation of readers and fundamentally shaped modern popular culture.", examples: "Other examples include George Sand, Mary Shelley, and Isabel Allende." },
+                    { name: "Mogul", statement: "The ambitious and clear-cut patterns in your print show a sharp mind for business and media. You build empires by connecting with people on a massive scale.", comparison: "Oprah Winfrey", bio: "Oprah Winfrey is an American talk show host, television producer, actress, author, and philanthropist. Her talk show was the highest-rated television program of its kind in history. Dubbed the 'Queen of All Media,' she was the richest African American of the 20th century and North America's first black multi-billionaire. She has built a media empire by fostering a unique connection of trust and empathy with her audience.", examples: "Other examples include Arianna Huffington, Sara Blakely, and Estée Lauder." },
+                    { name: "Trendsetter", statement: "The chic, bold lines of your print reveal an eye for style and a revolutionary spirit. You don't follow trends; you create the very definition of modern elegance.", comparison: "Coco Chanel", bio: "Gabrielle 'Coco' Chanel was a French fashion designer and businesswoman. The founder of the Chanel brand, she was credited in the post-World War I era with liberating women from the constraints of the 'corseted silhouette' and popularising a sporty, casual chic as the feminine standard of style. A prolific fashion creator, her influence extended beyond couture clothing, realising her design aesthetic in jewellery, handbags, and fragrance.", examples: "Other examples include Anna Wintour, a top fashion blogger, and a leading interior designer." },
+                    { name: "Artisan", statement: "The fine, detailed work in your print marks you as a master craftswoman. You create beauty and function with your hands, honouring tradition while perfecting your art.", comparison: "Ray Eames", bio: "Ray Eames was an American artist, designer, and filmmaker who, with her husband Charles, made groundbreaking contributions to modern architecture and furniture. She was a master of form and colour, and her artistic vision was central to the success of the Eames Office. Their work, including the iconic Eames Lounge Chair, fused art with everyday life, creating beautiful, functional objects that defined a generation and remain timeless classics.", examples: "Other examples include a master weaver, a Murano glassblower, and a calligrapher." },
+                    { name: "Alchemist", statement: "The transformative patterns in your print show a rare ability to turn the ordinary into the extraordinary, whether in the kitchen, the lab, or the soul.", comparison: "A Greek 'Yiayia' (Grandmother) in her kitchen", bio: "The Greek 'Yiayia' is the heart of the family, an alchemist who transforms simple, fresh ingredients into legendary meals through love and tradition. She is a keeper of recipes passed down through generations, yet her true magic lies in her intuition—a pinch of this, a handful of that. She creates not just food, but a sense of home, comfort, and unconditional love, turning her kitchen into the warmest place on Earth.", examples: "Other examples include a master perfumer, Julia Child, and an innovative chef." },
+                    { name: "Empath", statement: "The gentle, open loops of your print reveal a heart that feels deeply. You use your profound compassion to connect with and champion the vulnerable.", comparison: "Princess Diana", bio: "Diana, Princess of Wales, was a member of the British royal family. She was celebrated for her unprecedented approach to charity work. Her compassion, style, and high-profile advocacy for causes like AIDS awareness and the banning of landmines made her an international icon. Known as the 'People's Princess,' she possessed a remarkable ability to connect emotionally with the public, using her empathy as her greatest strength.", examples: "Other examples include a hospice nurse, a dedicated social worker, and Deanna Troi." }
+                ]
+            };
+
+            // --- ELEMENTS & STATE ---
+            const screens = {
+                welcome: document.getElementById('welcome-screen'),
+                gender: document.getElementById('gender-screen'),
+                analysis: document.getElementById('analysis-screen'),
+                reveal: document.getElementById('reveal-screen'),
+                results: document.getElementById('results-screen')
+            };
+
+            const elements = {
+                beginBtn: document.getElementById('begin-btn'),
+                maleBtn: document.getElementById('male-btn'),
+                femaleBtn: document.getElementById('female-btn'),
+                scannerBtn: document.getElementById('scanner-img-btn'),
+                analysisContent: document.getElementById('analysis-content'),
+                analysisLoader: document.getElementById('analysis-loader'),
+                loaderText: document.getElementById('loader-text'),
+                nextBtn: document.getElementById('next-btn'),
+                backBtn: document.getElementById('back-btn'),
+                restartBtn: document.getElementById('restart-btn'),
+                navContainer: document.querySelector('.nav-container'),
+            };
+
+            let userChoice = '';
+            let currentProfile;
+            let currentResultPage = 1;
+            let loaderInterval;
+
+            // --- FUNCTIONS ---
+            function switchScreen(screenToShow) {
+                for (const screen in screens) {
+                    screens[screen].classList.remove('active');
+                }
+                screens[screenToShow].classList.add('active');
+            }
+            
+            function startAnalysis(gender) {
+                userChoice = gender;
+                switchScreen('analysis');
+            }
+
+            function startReveal() {
+                clearInterval(loaderInterval);
+                currentProfile = profiles[userChoice][Math.floor(Math.random() * profiles[userChoice].length)];
+                document.getElementById('reveal-name').innerText = `The ${currentProfile.name}`;
+                switchScreen('reveal');
+                setTimeout(showFullResults, 2500);
+            }
+            
+            function showFullResults() {
+                document.getElementById('result-title').innerText = `You are The ${currentProfile.name}`;
+                document.getElementById('core-statement').innerText = currentProfile.statement;
+                document.getElementById('comparison-name').innerText = currentProfile.comparison;
+                document.getElementById('comparison-bio').innerText = currentProfile.bio;
+                document.getElementById('result-examples').innerText = currentProfile.examples;
+                
+                currentResultPage = 1;
+                updateResultPage();
+                switchScreen('results');
+            }
+            
+            function updateResultPage() {
+                const totalPages = 3;
+                for (let i = 1; i <= totalPages; i++) {
+                    document.getElementById(`results-page-${i}`).classList.remove('active');
+                }
+                document.getElementById(`results-page-${currentResultPage}`).classList.add('active');
+                
+                const isFinalPage = currentResultPage === totalPages;
+                elements.navContainer.style.display = isFinalPage ? 'none' : 'flex';
+                elements.restartBtn.style.display = isFinalPage ? 'inline-block' : 'none';
+
+                elements.backBtn.style.visibility = (currentResultPage === 1) ? 'hidden' : 'visible';
+            }
+
+            // --- EVENT LISTENERS ---
+            elements.beginBtn.addEventListener('click', () => switchScreen('gender'));
+            elements.maleBtn.addEventListener('click', () => startAnalysis('male'));
+            elements.femaleBtn.addEventListener('click', () => startAnalysis('female'));
+            
+            elements.scannerBtn.addEventListener('click', () => {
+                elements.analysisContent.style.display = 'none';
+                elements.analysisLoader.style.display = 'flex';
+                
+                const loaderMessages = ["Calibrating sensors...", "Scanning epidermal ridges...", "Analysing whorls and loops...", "Searching historical archives...", "Matching personality matrix...", "Finalising profile..."];
+                let messageIndex = 0;
+                elements.loaderText.innerText = loaderMessages[messageIndex];
+
+                loaderInterval = setInterval(() => {
+                    messageIndex++;
+                    if(messageIndex < loaderMessages.length) {
+                        elements.loaderText.innerText = loaderMessages[messageIndex];
+                    } else {
+                        clearInterval(loaderInterval);
+                    }
+                }, 800);
+
+                setTimeout(startReveal, loaderMessages.length * 800 + 400);
+            });
+
+            elements.nextBtn.addEventListener('click', () => {
+                const totalPages = 3;
+                if (currentResultPage < totalPages) { 
+                    currentResultPage++; 
+                    updateResultPage(); 
+                }
+            });
+
+            elements.backBtn.addEventListener('click', () => {
+                if (currentResultPage > 1) { 
+                    currentResultPage--; 
+                    updateResultPage(); 
+                }
+            });
+
+            elements.restartBtn.addEventListener('click', () => {
+                elements.analysisContent.style.display = 'flex';
+                elements.analysisLoader.style.display = 'none';
+                switchScreen('welcome');
+            });
+
+        });
+    </script>
+</body>
+</html>

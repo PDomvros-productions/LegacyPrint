@@ -8,8 +8,8 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
 
         :root {
-            --primary-bg: #020c1b;     /* Darkened from #0a192f */
-            --secondary-bg: #0a192f;   /* Darkened from #172a45 */
+            --primary-bg: #020c1b;
+            --secondary-bg: #0a192f;
             --accent-colour: #ffd700;
             --accent-colour-light: #fff8e1;
             --text-primary: #e6f1ff;
@@ -106,8 +106,8 @@
             cursor: pointer;
             margin: 20px 0;
             transition: all 0.3s ease;
-            border-radius: 15px; /* Added for non-square images */
-            object-fit: cover; /* Ensures image fits well */
+            border-radius: 15px;
+            object-fit: cover;
         }
         #scanner-img-btn:hover {
              transform: scale(1.05);
@@ -124,11 +124,15 @@
         }
 
         .results-page {
-             display: none; width: 100%;
-             flex-direction: column; align-items: center;
-             justify-content: center;
+             display: none;
+             width: 100%;
+             flex-direction: column;
+             align-items: center;
+             justify-content: flex-start; /* Aligns content to the top */
+             padding: 30px 20px; /* Add padding top and bottom */
              flex-grow: 1;
-             -webkit-overflow-scrolling: touch;
+             overflow-y: auto; /* Enable scrolling if content overflows */
+             -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
         }
         .results-page.active { display: flex; }
 
@@ -136,8 +140,8 @@
             width: 80px; height: 80px;
             margin-bottom: 15px;
             opacity: 0.6;
-            border-radius: 8px; /* Added for non-square images */
-            object-fit: cover; /* Ensures image fits well */
+            border-radius: 8px;
+            object-fit: cover;
         }
 
         .nav-container {
@@ -150,7 +154,14 @@
         }
         
         #comparison-name { font-size: clamp(1.8em, 8vw, 2.5em); margin: 5px 0 15px 0; }
-        #comparison-bio { font-style: italic; border-top: 1px solid #0a192f; padding-top: 15px;}
+        
+        #comparison-bio {
+            font-style: italic;
+            border-top: 1px solid #0a192f;
+            padding-top: 15px;
+            font-size: clamp(0.8em, 3.5vw, 1em); /* Smaller font for bio */
+        }
+
         #result-examples { font-size: 0.9em; }
 
     </style>
